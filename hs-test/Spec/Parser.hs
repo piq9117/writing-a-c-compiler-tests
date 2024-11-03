@@ -26,6 +26,13 @@ parserSpec = do
         "int"
         `shouldBe` (Right $ CCompiler.Parser.Keyword "int")
 
+    it "identitierParser" $ do
+      Text.Megaparsec.parse
+        CCompiler.Parser.identifierParser
+        "test"
+        "main"
+        `shouldBe` (Right $ CCompiler.Parser.Identifier "main")
+
 test_testTree :: IO TestTree
 test_testTree =
   testSpec "Parser Spec" $ do
