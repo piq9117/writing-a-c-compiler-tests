@@ -1,14 +1,27 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module CCompiler.Parser 
-  ( symbolParser, 
-    Symbol(..)
-  ) where
+module CCompiler.Parser
+  ( Symbol (..),
+    Keyword (..),
+    symbolParser,
+    keywordParser,
+  )
+where
 
+import Control.Applicative.Combinators (choice)
 import Text.Megaparsec qualified
+import Text.Megaparsec.Char qualified
 
 type Parser = Text.Megaparsec.Parsec Void Text
+
+newtype Keyword = Keyword Text
+  deriving newtype (Eq, Show)
+
+keywordParser :: Parser Keyword
+keywordParser = do
+  keyword <- keywords
+  pure (Keyword keyword)
 
 newtype Symbol = Symbol Text
   deriving newtype (Eq, Show)
@@ -22,3 +35,12 @@ symbols :: Parser Char
 symbols =
   Text.Megaparsec.oneOf
     ("{}();" :: [Text.Megaparsec.Token Text])
+
+keywords :: Parser Text
+keywords =
+  choice $
+    fmap
+      Text.Megaparsec.Char.string
+      [ "int",
+        "void"
+      ]
