@@ -29,7 +29,7 @@ instance ToText Stages where
 data Command = Command
   { stage :: Stages
   }
-  deriving stock Show
+  deriving stock (Show)
 
 runCommand :: IO ()
 runCommand = do
@@ -49,4 +49,3 @@ command = do
 
 stages :: Parser Text
 stages = strOption (long "stage" <> help "Compilation stage")
-
