@@ -69,7 +69,9 @@ library
     , relude
     , text
 
-  exposed-modules:  HsCompiler.Command
+  exposed-modules:
+    HsCompiler.Command
+    HsCompiler.Parser
 
 executable hs-compiler
   -- Import common warning flags.
