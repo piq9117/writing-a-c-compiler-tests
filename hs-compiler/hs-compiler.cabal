@@ -101,3 +101,25 @@ executable hs-compiler
     base hiding (Prelude),
     relude (Relude as Prelude),
     relude
+
+test-suite hs-compiler-test
+  hs-source-dirs: test
+  main-is:        Spec.hs
+  ghc-options:    -main-is Spec
+  type:           exitcode-stdio-1.0
+  build-depends:
+    , base
+    , hs-compiler
+    , hspec
+    , megaparsec
+    , relude
+    , tasty
+    , tasty-hspec
+    , text
+
+  mixins:
+    base hiding (Prelude),
+    relude (Relude as Prelude),
+    relude
+
+  other-modules:
