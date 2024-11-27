@@ -2,6 +2,7 @@
 
 module HsCompiler.Parser
   ( keyword,
+    keywords,
   )
 where
 
@@ -16,4 +17,7 @@ keyword =
   choice $
     fmap
       (Text.Megaparsec.try <<< Text.Megaparsec.Char.string)
-      ["int"]
+      keywords
+
+keywords :: [Text]
+keywords = ["int", "void", "return"]
