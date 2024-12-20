@@ -35,8 +35,10 @@ identifier =
   fmap toText $
     many identifierStart
   where
+    -- TODO this will output null
+    -- if the identifier starts with a digit
     identifierStart = do
-      -- Text.Megaparsec.notFollowedBy Text.Megaparsec.Char.digitChar
+      Text.Megaparsec.notFollowedBy Text.Megaparsec.Char.digitChar
       Text.Megaparsec.Char.asciiChar
         <|> Text.Megaparsec.Char.upperChar
         <|> Text.Megaparsec.Char.lowerChar

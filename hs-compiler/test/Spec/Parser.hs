@@ -37,7 +37,6 @@ parser = describe "Parsers" $ do
 
     Text.Megaparsec.parse
       HsCompiler.Parser.identifier
-      -- ((fmap toText $ many Text.Megaparsec.Char.asciiChar) :: HsCompiler.Parser.Parser Text)
       "test"
       "deezNuts"
       `shouldBe` (Right "deezNuts")
@@ -45,7 +44,7 @@ parser = describe "Parsers" $ do
     Text.Megaparsec.parse
       HsCompiler.Parser.identifier
       "test"
-      "1"
+      "1DeezNuts"
       `shouldBe` (Right "deezNuts")
 
 test_testTree :: IO TestTree
