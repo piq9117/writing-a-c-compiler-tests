@@ -41,11 +41,13 @@ parser = describe "Parsers" $ do
       "deezNuts"
       `shouldBe` (Right "deezNuts")
 
-    Text.Megaparsec.parse
-      HsCompiler.Parser.identifier
-      "test"
-      "1DeezNuts"
-      `shouldBe` (Right "deezNuts")
+    let result =
+          Text.Megaparsec.parse
+            HsCompiler.Parser.identifier
+            "test"
+            "1DeezNuts"
+
+    (isLeft result) `shouldBe` True
 
 test_testTree :: IO TestTree
 test_testTree =

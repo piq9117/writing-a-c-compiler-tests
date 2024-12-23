@@ -15,6 +15,7 @@ module HsCompiler.Parser
 where
 
 import Control.Applicative.Combinators (choice)
+import Data.Char qualified
 import Text.Megaparsec qualified
 import Text.Megaparsec.Char qualified
 
@@ -32,13 +33,12 @@ keywords = ["int", "void", "return"]
 
 identifier :: Parser Text
 identifier =
-  fmap toText $
-    many identifierStart
+  fmap toText $ do
+    start <- Text.Megaparsec.satisfy (not <<< Data.Char.isDigit)
+    rest <- many identifierRest
+    pure (start : rest)
   where
-    -- TODO this will output null
-    -- if the identifier starts with a digit
-    identifierStart = do
-      Text.Megaparsec.notFollowedBy Text.Megaparsec.Char.digitChar
+    identifierRest = do
       Text.Megaparsec.Char.asciiChar
         <|> Text.Megaparsec.Char.upperChar
         <|> Text.Megaparsec.Char.lowerChar
