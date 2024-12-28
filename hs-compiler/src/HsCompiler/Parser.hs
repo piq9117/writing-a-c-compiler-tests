@@ -11,6 +11,7 @@ module HsCompiler.Parser
     semicolon,
     constant,
     Parser,
+    runParser
   )
 where
 
@@ -20,6 +21,20 @@ import Text.Megaparsec qualified
 import Text.Megaparsec.Char qualified
 
 type Parser = Text.Megaparsec.Parsec () Text
+
+runParser :: Text -> Maybe [Text]
+runParser content = Text.Megaparsec.parseMaybe fileParser content
+
+fileParser :: Parser [Text]
+fileParser = many $ keyword
+  <|> identifier
+  <|> openParens
+  <|> closeParens
+  <|> openBrace
+  <|> closeBrace
+  <|> semicolon
+  <|> constant
+
 
 keyword :: Parser Text
 keyword =

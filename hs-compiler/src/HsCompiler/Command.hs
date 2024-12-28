@@ -1,5 +1,6 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 module HsCompiler.Command (runCommand) where
 
@@ -7,45 +8,51 @@ import Options.Applicative
   ( Parser,
     execParser,
     fullDesc,
-    help,
     info,
     long,
-    strOption,
+    help,
+    metavar,
+    strOption
   )
+import HsCompiler.Parser qualified
 
-data Stages
-  = Lex
-  | Parse
-  | CodeGen
+data Stage
+  = Lex FilePath
+  | Parse FilePath
+  | CodeGen FilePath
   deriving stock (Eq, Show)
 
-instance ToText Stages where
+instance ToText Stage where
   toText stage =
     case stage of
-      Lex -> "lex"
-      Parse -> "parse"
-      CodeGen -> "code-gen"
-
-data Command = Command
-  { stage :: Stages
-  }
-  deriving stock (Show)
+      Lex _ -> "lex"
+      Parse _ -> "parse"
+      CodeGen _ -> "code-gen"
 
 runCommand :: IO ()
 runCommand = do
-  command <- execParser (info command fullDesc)
-  case command of
-    Nothing -> fail "Invalid stage"
-    Just command -> print command
+  stages <- execParser (info stages fullDesc)
+  case stages of
+    Lex filepath -> do
+      fileContent <- readFileBS filepath
+      print (HsCompiler.Parser.runParser (decodeUtf8 fileContent))
+      pure ()
+    Parse _filepath -> pure ()
+    CodeGen filepath -> print $ "this is the filepath: " <> filepath
 
-command :: Parser (Maybe Command)
-command = do
-  stages <&> \stg ->
-    case stg of
-      "lex" -> Just (Command {stage = Lex})
-      "parse" -> Just (Command {stage = Parse})
-      "code-gen" -> Just (Command {stage = CodeGen})
-      _ -> fail "invalid stage"
+lexInput :: Parser Stage
+lexInput = 
+  Lex <$> strOption (long "lex" <> metavar "FILEPATH" <> help "File path")
 
-stages :: Parser Text
-stages = strOption (long "stage" <> help "Compilation stage")
+parseInput :: Parser Stage
+parseInput = 
+  Parse <$> strOption (long "parse" <> metavar "FILEPATH" <> help "File path")
+
+codeGenInput :: Parser Stage
+codeGenInput =
+  CodeGen <$> strOption (long "code-gen" <> metavar "FILEPATH" <> help "File path")
+
+stages :: Parser Stage
+stages = lexInput
+  <|> parseInput
+  <|> codeGenInput
