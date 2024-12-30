@@ -76,7 +76,21 @@ parser = describe "Parsers" $ do
       HsCompiler.Parser.fileParser
       "test"
       "int main(void){return 0;}"
-      `shouldBe` (Right [])
+      `shouldBe` ( Right
+                     [ "int",
+                       " ",
+                       "main",
+                       "(",
+                       "void",
+                       ")",
+                       "{",
+                       "return",
+                       " ",
+                       "0",
+                       ";",
+                       "}"
+                     ]
+                 )
 
 test_testTree :: IO TestTree
 test_testTree =
