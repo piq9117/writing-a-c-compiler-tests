@@ -49,6 +49,22 @@ parser = describe "Parsers" $ do
 
     (isLeft result) `shouldBe` True
 
+  it "constant" $ do
+    let result =
+          Text.Megaparsec.parse
+            HsCompiler.Parser.constant
+            "test"
+            "int"
+
+    (isLeft result) `shouldBe` True
+
+  it "fileParser" $ do
+    Text.Megaparsec.parse
+      HsCompiler.Parser.fileParser
+      "test"
+      "int main(void){return 0;}"
+      `shouldBe` (Right [])
+
 test_testTree :: IO TestTree
 test_testTree =
   testSpec "Parser Spec" $ do

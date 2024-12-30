@@ -11,12 +11,14 @@ module HsCompiler.Parser
     semicolon,
     constant,
     Parser,
-    runParser
+    runParser,
+    fileParser,
   )
 where
 
 import Control.Applicative.Combinators (choice)
 import Data.Char qualified
+import Data.Text qualified
 import Text.Megaparsec qualified
 import Text.Megaparsec.Char qualified
 
@@ -26,15 +28,17 @@ runParser :: Text -> Maybe [Text]
 runParser content = Text.Megaparsec.parseMaybe fileParser content
 
 fileParser :: Parser [Text]
-fileParser = many $ keyword
-  <|> identifier
-  <|> openParens
-  <|> closeParens
-  <|> openBrace
-  <|> closeBrace
-  <|> semicolon
-  <|> constant
+fileParser =
+  many $
+    keyword
+      <|> identifier
 
+-- <|> openParens
+-- <|> closeParens
+-- <|> openBrace
+-- <|> closeBrace
+-- <|> semicolon
+-- <|> constant
 
 keyword :: Parser Text
 keyword =
@@ -80,4 +84,8 @@ semicolon =
   toText <$> (Text.Megaparsec.Char.string ";")
 
 constant :: Parser Text
-constant = toText <$> many Text.Megaparsec.Char.digitChar
+constant = do
+  constantChar <- toText <$> many Text.Megaparsec.Char.digitChar
+  if Data.Text.null constantChar
+    then fail "not a constant character"
+    else pure constantChar

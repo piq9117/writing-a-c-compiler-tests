@@ -1,20 +1,20 @@
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module HsCompiler.Command (runCommand) where
 
+import HsCompiler.Parser qualified
 import Options.Applicative
   ( Parser,
     execParser,
     fullDesc,
+    help,
     info,
     long,
-    help,
     metavar,
-    strOption
+    strOption,
   )
-import HsCompiler.Parser qualified
 
 data Stage
   = Lex FilePath
@@ -41,11 +41,11 @@ runCommand = do
     CodeGen filepath -> print $ "this is the filepath: " <> filepath
 
 lexInput :: Parser Stage
-lexInput = 
+lexInput =
   Lex <$> strOption (long "lex" <> metavar "FILEPATH" <> help "File path")
 
 parseInput :: Parser Stage
-parseInput = 
+parseInput =
   Parse <$> strOption (long "parse" <> metavar "FILEPATH" <> help "File path")
 
 codeGenInput :: Parser Stage
@@ -53,6 +53,7 @@ codeGenInput =
   CodeGen <$> strOption (long "code-gen" <> metavar "FILEPATH" <> help "File path")
 
 stages :: Parser Stage
-stages = lexInput
-  <|> parseInput
-  <|> codeGenInput
+stages =
+  lexInput
+    <|> parseInput
+    <|> codeGenInput
