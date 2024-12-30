@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module HsCompiler.Parser
-  ( keyword,
+  ( Parser,
+    keyword,
     keywords,
     identifier,
     openParens,
@@ -10,9 +11,9 @@ module HsCompiler.Parser
     closeBrace,
     semicolon,
     constant,
-    Parser,
     runParser,
     fileParser,
+    space,
   )
 where
 
@@ -31,35 +32,48 @@ fileParser :: Parser [Text]
 fileParser =
   many $
     keyword
+      <|> space
       <|> identifier
-
--- <|> openParens
--- <|> closeParens
--- <|> openBrace
--- <|> closeBrace
--- <|> semicolon
--- <|> constant
+      <|> openParens
+      <|> closeParens
+      <|> openBrace
+      <|> closeBrace
+      <|> semicolon
+      <|> constant
 
 keyword :: Parser Text
 keyword =
-  choice $
-    fmap
-      (Text.Megaparsec.try <<< Text.Megaparsec.Char.string)
-      keywords
+  ( choice $
+      fmap
+        (Text.Megaparsec.try <<< Text.Megaparsec.Char.string)
+        keywords
+  )
 
 keywords :: [Text]
 keywords = ["int", "void", "return"]
 
 identifier :: Parser Text
-identifier =
+identifier = do
   fmap toText $ do
+    Text.Megaparsec.notFollowedBy
+      ( keyword
+          <|> space
+          <|> openParens
+          <|> closeParens
+          <|> openBrace
+          <|> closeBrace
+          <|> semicolon
+          <|> constant
+      )
     start <- Text.Megaparsec.satisfy (not <<< Data.Char.isDigit)
     rest <- many identifierRest
     pure (start : rest)
   where
-    identifierRest = do
-      Text.Megaparsec.Char.asciiChar
-        <|> Text.Megaparsec.Char.upperChar
+    identifierRest =
+      do
+        -- TODO asciiChar causes to parse parenthesis
+        -- Text.Megaparsec.Char.asciiChar
+        Text.Megaparsec.Char.upperChar
         <|> Text.Megaparsec.Char.lowerChar
         <|> Text.Megaparsec.Char.char '_'
 
@@ -89,3 +103,8 @@ constant = do
   if Data.Text.null constantChar
     then fail "not a constant character"
     else pure constantChar
+
+space :: Parser Text
+space = do
+  spaceChar <- Text.Megaparsec.Char.spaceChar
+  pure (toText [spaceChar])

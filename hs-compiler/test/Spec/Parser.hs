@@ -32,6 +32,12 @@ parser = describe "Parsers" $ do
     Text.Megaparsec.parse
       HsCompiler.Parser.identifier
       "test"
+      "main(void)"
+      `shouldBe` (Right "main")
+
+    Text.Megaparsec.parse
+      HsCompiler.Parser.identifier
+      "test"
       "deez_nuts"
       `shouldBe` (Right "deez_nuts")
 
@@ -57,6 +63,13 @@ parser = describe "Parsers" $ do
             "int"
 
     (isLeft result) `shouldBe` True
+
+  it "space" $ do
+    Text.Megaparsec.parse
+      HsCompiler.Parser.space
+      "test"
+      " "
+      `shouldBe` (Right " ")
 
   it "fileParser" $ do
     Text.Megaparsec.parse
