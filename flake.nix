@@ -17,15 +17,16 @@
           overrides = hfinal: hprev: { };
         };
 
-        hs-compiler = final.hsPkgs.callCabal2nix "hs-compiler" ./hs-compiler/. {};
+        hs-compiler = final.hsPkgs.callCabal2nix "hs-compiler" ./hs-compiler/. { };
 
       };
 
-      packages = forAllSystems (system: 
-        let 
+      packages = forAllSystems (system:
+        let
           pkgs = nixpkgsFor.${system};
 
-        in {
+        in
+        {
           default = pkgs.hs-compiler;
         });
 

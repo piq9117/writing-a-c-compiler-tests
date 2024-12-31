@@ -23,10 +23,10 @@ import Data.Text qualified
 import Text.Megaparsec qualified
 import Text.Megaparsec.Char qualified
 
-type Parser = Text.Megaparsec.Parsec () Text
+type Parser = Text.Megaparsec.Parsec Void Text
 
-runParser :: Text -> Maybe [Text]
-runParser content = Text.Megaparsec.parseMaybe fileParser content
+runParser :: Text -> Either (Text.Megaparsec.ParseErrorBundle Text Void) [Text]
+runParser content = Text.Megaparsec.parse fileParser "" content
 
 fileParser :: Parser [Text]
 fileParser =
@@ -52,12 +52,28 @@ keyword =
 keywords :: [Text]
 keywords = ["int", "void", "return"]
 
+invalidIdentifiers :: [Text]
+invalidIdentifiers = ["@"]
+
+illegalIdentifier :: Parser Text
+illegalIdentifier = do
+  choice $
+    fmap
+      Text.Megaparsec.Char.string
+      invalidIdentifiers
+
+invalidStart :: Parser ()
+invalidStart = do
+  ident <- Text.Megaparsec.optional illegalIdentifier
+  case ident of
+    Nothing -> pure ()
+    Just illegalChar -> fail $ "Illegal character found: " <> (toString illegalChar)
+
 identifier :: Parser Text
 identifier = do
   fmap toText $ do
     Text.Megaparsec.notFollowedBy
       ( keyword
-          <|> space
           <|> openParens
           <|> closeParens
           <|> openBrace
@@ -65,6 +81,7 @@ identifier = do
           <|> semicolon
           <|> constant
       )
+    void invalidStart
     start <- Text.Megaparsec.satisfy (not <<< Data.Char.isDigit)
     rest <- many identifierRest
     pure (start : rest)

@@ -12,6 +12,7 @@ import Test.Tasty (TestTree)
 import Test.Tasty.Hspec (testSpec)
 import Text.Megaparsec qualified
 import Text.Megaparsec.Char qualified
+import Text.Megaparsec.Error qualified
 
 parser :: Spec
 parser = describe "Parsers" $ do
@@ -91,6 +92,15 @@ parser = describe "Parsers" $ do
                        "}"
                      ]
                  )
+
+    let result =
+          Text.Megaparsec.parse
+            HsCompiler.Parser.fileParser
+            "test"
+            "int main(void){return @b;}"
+
+    (bimap Text.Megaparsec.errorBundlePretty identity result)
+      `shouldBe` (Left "test:1:24:\n  |\n1 | int main(void){return @b;}\n  |                        ^\nIllegal character found: @\n")
 
 test_testTree :: IO TestTree
 test_testTree =

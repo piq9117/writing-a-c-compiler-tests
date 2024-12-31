@@ -4,6 +4,7 @@
 
 module HsCompiler.Command (runCommand) where
 
+import Control.Exception (throwIO)
 import HsCompiler.Parser qualified
 import Options.Applicative
   ( Parser,
@@ -35,8 +36,9 @@ runCommand = do
   case stages of
     Lex filepath -> do
       fileContent <- readFileBS filepath
-      print (HsCompiler.Parser.runParser (decodeUtf8 fileContent))
-      pure ()
+      case HsCompiler.Parser.runParser (decodeUtf8 fileContent) of
+        Left err -> throwIO err
+        Right _ -> pure ()
     Parse _filepath -> pure ()
     CodeGen filepath -> print $ "this is the filepath: " <> filepath
 
