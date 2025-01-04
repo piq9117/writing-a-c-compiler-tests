@@ -14,6 +14,7 @@ module HsCompiler.Parser
     runParser,
     fileParser,
     space,
+    errorOnInvalidToken,
   )
 where
 
@@ -52,18 +53,18 @@ keyword =
 keywords :: [Text]
 keywords = ["int", "void", "return"]
 
-invalidIdentifiers :: [Text]
-invalidIdentifiers = ["@"]
+invalidTokens :: [Text]
+invalidTokens = ["@", "`"]
 
 illegalIdentifier :: Parser Text
 illegalIdentifier = do
   choice $
     fmap
       Text.Megaparsec.Char.string
-      invalidIdentifiers
+      invalidTokens
 
-invalidStart :: Parser ()
-invalidStart = do
+errorOnInvalidToken :: Parser ()
+errorOnInvalidToken = do
   ident <- Text.Megaparsec.optional illegalIdentifier
   case ident of
     Nothing -> pure ()
@@ -81,7 +82,10 @@ identifier = do
           <|> semicolon
           <|> constant
       )
-    void invalidStart
+
+    -- start can't be invalid token
+    void errorOnInvalidToken
+
     start <- Text.Megaparsec.satisfy (not <<< Data.Char.isDigit)
     rest <- many identifierRest
     pure (start : rest)

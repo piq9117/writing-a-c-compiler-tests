@@ -72,6 +72,15 @@ parser = describe "Parsers" $ do
       " "
       `shouldBe` (Right " ")
 
+  it "errorOnInvalidToken" $ do
+    let result =
+          Text.Megaparsec.parse
+            (many HsCompiler.Parser.errorOnInvalidToken)
+            "test"
+            "`@"
+    (bimap Text.Megaparsec.errorBundlePretty identity result)
+      `shouldBe` (Left "test:1:2:\n  |\n1 | `@\n  |  ^\nIllegal character found: `\n")
+
   it "fileParser" $ do
     Text.Megaparsec.parse
       HsCompiler.Parser.fileParser
